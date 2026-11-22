@@ -2,6 +2,10 @@ package graph;
 
 import java.util.HashMap;
 import util.GameMap;
+import util.MazeGenerator;
+
+import java.util.LinkedList;
+import java.util.Queue;
 
 /**
  * A graph representing a game's maze, connecting the "path" tiles of a tile grid.
@@ -156,13 +160,35 @@ public class MazeGraph {
         width = map.types().length;
         height = map.types()[0].length;
         vertices = new HashMap<>();
-
-        // TODO 2.1: Complete the implementation of this method. Upon return, `vertices` should
-        //  contain an entry for each location in `map` with type `PATH`.  Every pair of
-        //  orthogonally-adjacent vertices should be connected by a pair of edges (one in each
-        //  direction). The weights of these edges should be computed from the elevation difference
-        //  between the map tiles they connect using the `edgeWeight()` function. Your implementation
-        //  must have a runtime that scales linearly with the number of `PATH` tiles.
+        Queue<MazeVertex> frontier = new LinkedList<>();
+        IPair startLoc = new IPair(2, 2);
+        MazeVertex start = new MazeVertex(startLoc);
+        vertices.put(startLoc, start);
+        frontier.add(start);
+        while(!frontier.isEmpty()) {
+            MazeVertex v = frontier.remove();
+            int i = v.loc().i();
+            int j = v.loc().j();
+            for (Direction d : Direction.values()) {
+                IPair current = switch (d) {
+                    case Direction.LEFT -> new IPair((i-1 + width) % width,j);
+                    case Direction.RIGHT -> new IPair((i+1 + width) % width,j);
+                    case Direction.UP -> new IPair(i,(j-1 + height) % height);
+                    case Direction.DOWN -> new IPair(i,(j+1 + height) % height);
+                };
+                if (map.types()[current.i()][current.j()] != MazeGenerator.TileType.PATH){
+                    continue;
+                }
+                if(!vertices.containsKey(current)){
+                    MazeVertex neighbor = new MazeVertex(current);
+                    vertices.put(current, neighbor);
+                    frontier.add(neighbor);
+                }
+                MazeVertex neighbor = vertices.get(current);
+                double weight = edgeWeight(map.elevations()[i][j], map.elevations()[current.i()][current.j()]);
+                v.addOutgoingEdge(new MazeEdge(v, neighbor, d, weight));
+            }
+        }
     }
 
     /**
