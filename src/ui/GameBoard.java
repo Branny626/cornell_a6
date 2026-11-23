@@ -2,6 +2,8 @@ package ui;
 
 import java.awt.geom.Line2D;
 import java.beans.PropertyChangeListener;
+
+import graph.MazeGraph;
 import util.MazeGenerator;
 import java.awt.BasicStroke;
 import java.awt.Color;
@@ -129,6 +131,26 @@ public class GameBoard extends JPanel {
         repaint();
     }
 
+    /** Draw each item on the board according to its specificaitons:  a white, centered circle on the tile of 0.3
+     * diameter if it is a dot, a white, centered circle on the tile of 0.7 diameter if it is a pellet, and omit
+     * it if it has item type none.
+     */
+
+    private void paintItems(Graphics2D g2) {
+        for (MazeVertex v : model.graph().vertices()) {
+            int i = v.loc().i();
+            int j = v.loc().j();
+            g2.setColor(Color.WHITE);
+            GameModel.Item itemType = model.itemAt(v);
+                if (itemType == GameModel.Item.DOT) {
+                    g2.fill(new Ellipse2D.Double(i + 0.35, j + 0.35, 0.3, 0.3));
+                } else if (itemType == GameModel.Item.PELLET) {
+                    g2.fill(new Ellipse2D.Double(i + 0.15, j + 0.15, 0.7, 0.7));
+                }
+            }
+    }
+
+
     @Override
     public void paintComponent(Graphics g) {
         super.paintComponent(g);
@@ -155,13 +177,7 @@ public class GameBoard extends JPanel {
             }
         }
 
-        // TODO 2.3: Add code to visualize the items (dots and pellets) on the board. Each item
-        //  should be drawn centered on the tile corresponding to the vertex that contains it.
-        //  Look through the `GameModel` class to see how to access this information. Both pellets
-        //  and dots are drawn as white circles. Dots have a diameter of 0.3 units and pellets have
-        //  a diameter of 0.7 units, both in `g2`'s coordinates. You can use an `Ellipse2D.Double`
-        //  to model these shapes. You could add this code all here but it will likely be more
-        //  maintainable to extract it into a separate helper method.
+        paintItems(g2);
 
         if (showGraph) {
             for (MazeVertex v : model.graph().vertices()) {
