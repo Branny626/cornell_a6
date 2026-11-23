@@ -235,4 +235,30 @@ public class MazeGraph {
     /**
      * Return the full collection of vertices in this graph.
      */
-    pub
+    public Iterable<MazeVertex> vertices() {
+        return vertices.values();
+    }
+
+    /**
+     * Return the first edge that PacMann will traverse at the start of a game.
+     */
+    public MazeEdge pacMannStartingEdge() {
+        IPair startingLoc = new IPair((width - 1) / 2, 3 * ((3 * (height / 3) - 1) / 4) + 2);
+        MazeVertex t = vertices.get(startingLoc);
+        if (t.edgeMap.containsKey(Direction.LEFT)) {
+            return t.edgeMap.get(Direction.LEFT).reverse();
+        } else {
+            return t.edgeMap.get(Direction.UP).reverse();
+        }
+    }
+
+    /**
+     * Return the first edge that a ghost will traverse upon transitioning from the WAIT to the
+     * CHASE state.
+     */
+    public MazeEdge ghostStartingEdge() {
+        IPair startingLoc = new IPair((width - 1) / 2, 3 * ((height - 3) / 6) - 1);
+        MazeVertex s = vertices.get(startingLoc);
+        return s.edgeMap.get(Direction.RIGHT);
+    }
+}
